@@ -2,10 +2,12 @@ import EmployeeService from "../service/employee.service.js";
 import { roundNumber } from "../utils/helper.js";
 import FirestoreService from '../service/firestore.service.js';
 import TipService from "../service/tip.service.js";
+import ReviewService from "../service/review.service.js";
 
 const employeeService = new EmployeeService();
 const firestoreService = new FirestoreService();
 const tipService = new TipService();
+const reviewService = new ReviewService();
 
 class EmployeeController {
     register = async (req, res) => {
@@ -189,6 +191,44 @@ class EmployeeController {
             return res.status(result.status).json(result);
         } catch (error) {
             return res.status(500).json({ success: false, message: error.message });
+        }
+    }
+
+    addReview = async (req, res) => {
+        try {
+            const result = await reviewService.addReview(req.body);
+            return res.status(result.status).json(result);
+        } catch (err) {
+            return res.status(500).json({
+                'success': false,
+                'message': err.message
+            });
+        }
+    }
+
+    getReviews = async (req, res) => {
+        try {
+            const { user_id, tip_id } = req.query;
+            const result = await reviewService.getReviews(user_id, tip_id);
+            return res.status(result.status).json(result);
+        } catch (err) {
+            return res.status(500).json({
+                'success': false,
+                'message': err.message
+            });
+        }
+    }
+
+    getReviewSummary = async (req, res) => {
+        try {
+            const { user_id } = req.query;
+            const result = await reviewService.getReviewSummary(user_id);
+            return res.status(result.status).json(result);
+        } catch (err) {
+            return res.status(500).json({
+                'success': false,
+                'message': err.message
+            });
         }
     }
 }

@@ -1,10 +1,18 @@
 import mongoose from 'mongoose';
 
+const reviewSchema = new mongoose.Schema({
+    rating: { type: Number, required: true },
+    comment: { type: String, required: true },
+    customerName: { type: String, required: true },
+    date: { type: Date, default: Date.now }
+});
+
 const tipSchema = new mongoose.Schema({
     amount: { type: Number, required: true },
     customerName: { type: String, required: true },
     paymentMethod: { type: String, required: true },
-    date: { type: Date, default: Date.now }
+       date: { type: Date, default: Date.now },
+    reviews: [reviewSchema]
 });
 
 const employeeSchema = new mongoose.Schema({

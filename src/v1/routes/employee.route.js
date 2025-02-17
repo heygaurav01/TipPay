@@ -17,6 +17,11 @@ router.post('/add-tip', employeeController.addTip);
 router.get('/get-tips', employeeController.getTips);
 router.get('/get-tip-details', employeeController.getTipDetails);
 
+// Review Management Routes
+router.post('/add-review', employeeController.addReview);
+router.get('/get-reviews', employeeController.getReviews);
+router.get('/get-review-summary', employeeController.getReviewSummary);
+
 export default (app) => {
     app.use('/api/v1/employees', router);
 };
