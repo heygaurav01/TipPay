@@ -3,11 +3,17 @@ import { roundNumber } from "../utils/helper.js";
 import FirestoreService from '../service/firestore.service.js';
 import TipService from "../service/tip.service.js";
 import ReviewService from "../service/review.service.js";
+import PerformanceService from "../service/performance.service.js";
+import PayoutService from "../service/payout.service.js";
+import OTPService from "../service/otp.service.js";
 
 const employeeService = new EmployeeService();
 const firestoreService = new FirestoreService();
 const tipService = new TipService();
 const reviewService = new ReviewService();
+const performanceService = new PerformanceService();
+const payoutService = new PayoutService();
+const otpService = new OTPService();
 
 class EmployeeController {
     register = async (req, res) => {
@@ -223,6 +229,83 @@ class EmployeeController {
         try {
             const { user_id } = req.query;
             const result = await reviewService.getReviewSummary(user_id);
+            return res.status(result.status).json(result);
+        } catch (err) {
+            return res.status(500).json({
+                'success': false,
+                'message': err.message
+            });
+        }
+    }
+
+    getPerformance = async (req, res) => {
+        try {
+            const { user_id, period } = req.query;
+            const result = await performanceService.getPerformance(user_id, period);
+            return res.status(result.status).json(result);
+        } catch (err) {
+            return res.status(500).json({
+                'success': false,
+                'message': err.message
+            });
+        }
+    }
+
+    comparePerformance = async (req, res) => {
+        try {
+            const { user_id, period } = req.query;
+            const result = await performanceService.comparePerformance(user_id, period);
+            return res.status(result.status).json(result);
+        } catch (err) {
+            return res.status(500).json({
+                'success': false,
+                'message': err.message
+            });
+        }
+    }
+
+    requestPayout = async (req, res) => {
+        try {
+            const result = await payoutService.requestPayout(req.body);
+            return res.status(result.status).json(result);
+        } catch (err) {
+            return res.status(500).json({
+                'success': false,
+                'message': err.message
+            });
+        }
+    }
+
+    getPayoutHistory = async (req, res) => {
+        try {
+            const { user_id } = req.query;
+            const result = await payoutService.getPayoutHistory(user_id);
+            return res.status(result.status).json(result);
+        } catch (err) {
+            return res.status(500).json({
+                'success': false,
+                'message': err.message
+            });
+        }
+    }
+
+    sendOTP = async (req, res) => {
+        try {
+            const { phoneNumber } = req.body;
+            const result = await otpService.sendOTP(phoneNumber);
+            return res.status(result.status).json(result);
+        } catch (err) {
+            return res.status(500).json({
+                'success': false,
+                'message': err.message
+            });
+        }
+    }
+
+    verifyOTP = async (req, res) => {
+        try {
+            const { uid, otp } = req.body;
+            const result = await otpService.verifyOTP(uid, otp);
             return res.status(result.status).json(result);
         } catch (err) {
             return res.status(500).json({

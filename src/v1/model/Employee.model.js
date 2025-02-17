@@ -11,8 +11,16 @@ const tipSchema = new mongoose.Schema({
     amount: { type: Number, required: true },
     customerName: { type: String, required: true },
     paymentMethod: { type: String, required: true },
-       date: { type: Date, default: Date.now },
+    date: { type: Date, default: Date.now },
     reviews: [reviewSchema]
+});
+
+const payoutSchema = new mongoose.Schema({
+    amount: { type: Number, required: true },
+    method: { type: String, required: true }, // e.g., 'bank', 'wallet', 'upi'
+    status: { type: String, default: 'pending' }, // e.g., 'pending', 'completed'
+    fees: { type: Number, default: 0 },
+    date: { type: Date, default: Date.now }
 });
 
 const employeeSchema = new mongoose.Schema({
@@ -32,7 +40,9 @@ const employeeSchema = new mongoose.Schema({
     emailVerified: { type: Number, default: 0 },
     bankAccount: { type: String, default: '' },
     walletLink: { type: String, default: '' },
-    tips: [tipSchema]
+    upiId: { type: String, default: '' }, // Add UPI ID field
+    tips: [tipSchema],
+    payouts: [payoutSchema] // Ensure payouts field is defined
 }, { timestamps: true });
 
 const Employee = mongoose.model('Employee', employeeSchema);

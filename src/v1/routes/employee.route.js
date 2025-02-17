@@ -22,6 +22,18 @@ router.post('/add-review', employeeController.addReview);
 router.get('/get-reviews', employeeController.getReviews);
 router.get('/get-review-summary', employeeController.getReviewSummary);
 
+// Performance Dashboard Routes
+router.get('/get-performance', employeeController.getPerformance);
+router.get('/compare-performance', employeeController.comparePerformance);
+
+// Payout Management Routes
+router.post('/request-payout', employeeController.requestPayout);
+router.get('/get-payout-history', employeeController.getPayoutHistory);
+
+// OTP Management Routes
+router.post('/send-otp', employeeController.sendOTP);
+router.post('/verify-otp', employeeController.verifyOTP);
+
 export default (app) => {
     app.use('/api/v1/employees', router);
 };
