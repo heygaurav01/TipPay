@@ -136,6 +136,30 @@ class EmployeeController {
             return res.status(500).json({ success: false, message: error.message });
         }
     }
+
+    updateProfile = async (req, res) => {
+        try {
+            const result = await employeeService.updateProfile(req.body);
+            return res.status(result.status).json(result);
+        } catch (err) {
+            return res.status(500).json({
+                'success': false,
+                'message': err.message
+            });
+        }
+    }
+
+    updateBankDetails = async (req, res) => {
+        try {
+            const result = await employeeService.updateBankDetails(req.body);
+            return res.status(result.status).json(result);
+        } catch (err) {
+            return res.status(500).json({
+                'success': false,
+                'message': err.message
+            });
+        }
+    }
 }
 
 export default EmployeeController;

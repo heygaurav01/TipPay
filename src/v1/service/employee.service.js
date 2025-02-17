@@ -16,9 +16,9 @@ const employeeRepository = new EmployeeRepository();
 class EmployeeService {
     async register(data) {
         try {
-            const { email, password, ...rest } = data;
+            const { fullName, email, password, phoneNumber, ...rest } = data;
             const hashedPassword = await bcrypt.hash(password, 10);
-            const employee = new Employee({ email, password: hashedPassword, ...rest });
+            const employee = new Employee({ fullName, email, password: hashedPassword, phoneNumber, ...rest });
             await employee.save();
             return { status: 201, message: 'Employee registered successfully' };
         } catch (error) {
@@ -160,6 +160,41 @@ class EmployeeService {
         try {
             const employees = await Employee.find();
             return { status: 200, employees };
+        } catch (error) {
+            return { status: 500, message: error.message };
+        }
+    }
+
+    async updateProfile(data) {
+        try {
+            const { user_id, fullName, profilePicture, jobTitle, department, location } = data;
+            const employee = await Employee.findById(user_id);
+            if (!employee) {
+                return { status: 404, message: 'Employee not found' };
+            }
+            employee.fullName = fullName || employee.fullName;
+            employee.profilePicture = profilePicture || employee.profilePicture;
+            employee.jobTitle = jobTitle || employee.jobTitle;
+            employee.department = department || employee.department;
+            employee.location = location || employee.location;
+            await employee.save();
+            return { status: 200, message: 'Profile updated successfully', employee };
+        } catch (error) {
+            return { status: 500, message: error.message };
+        }
+    }
+
+    async updateBankDetails(data) {
+        try {
+            const { user_id, bankAccount, walletLink } = data;
+            const employee = await Employee.findById(user_id);
+            if (!employee) {
+                return { status: 404, message: 'Employee not found' };
+            }
+            employee.bankAccount = bankAccount || employee.bankAccount;
+            employee.walletLink = walletLink || employee.walletLink;
+            await employee.save();
+            return { status: 200, message: 'Bank details updated successfully', employee };
         } catch (error) {
             return { status: 500, message: error.message };
         }
