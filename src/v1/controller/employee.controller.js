@@ -1,9 +1,11 @@
 import EmployeeService from "../service/employee.service.js";
 import { roundNumber } from "../utils/helper.js";
 import FirestoreService from '../service/firestore.service.js';
+import TipService from "../service/tip.service.js";
 
 const employeeService = new EmployeeService();
 const firestoreService = new FirestoreService();
+const tipService = new TipService();
 
 class EmployeeController {
     register = async (req, res) => {
@@ -158,6 +160,35 @@ class EmployeeController {
                 'success': false,
                 'message': err.message
             });
+        }
+    }
+
+    async addTip(req, res) {
+        try {
+            const result = await tipService.addTip(req.body);
+            return res.status(result.status).json(result);
+        } catch (error) {
+            return res.status(500).json({ success: false, message: error.message });
+        }
+    }
+
+    async getTips(req, res) {
+        try {
+            const { user_id, period } = req.query;
+            const result = await tipService.getTips(user_id, period);
+            return res.status(result.status).json(result);
+        } catch (error) {
+            return res.status(500).json({ success: false, message: error.message });
+        }
+    }
+
+    async getTipDetails(req, res) {
+        try {
+            const { user_id, tip_id } = req.query;
+            const result = await tipService.getTipDetails(user_id, tip_id);
+            return res.status(result.status).json(result);
+        } catch (error) {
+            return res.status(500).json({ success: false, message: error.message });
         }
     }
 }

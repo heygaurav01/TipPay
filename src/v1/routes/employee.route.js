@@ -12,6 +12,11 @@ router.get('/list', employeeController.getEmployees);
 router.put('/update-profile', employeeController.updateProfile);
 router.put('/update-bank-details', employeeController.updateBankDetails);
 
+// Tip Management Routes
+router.post('/add-tip', employeeController.addTip);
+router.get('/get-tips', employeeController.getTips);
+router.get('/get-tip-details', employeeController.getTipDetails);
+
 export default (app) => {
     app.use('/api/v1/employees', router);
 };

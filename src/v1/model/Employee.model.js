@@ -1,5 +1,12 @@
 import mongoose from 'mongoose';
 
+const tipSchema = new mongoose.Schema({
+    amount: { type: Number, required: true },
+    customerName: { type: String, required: true },
+    paymentMethod: { type: String, required: true },
+    date: { type: Date, default: Date.now }
+});
+
 const employeeSchema = new mongoose.Schema({
     fullName: { type: String, required: true },
     email: { type: String, required: true },
@@ -16,7 +23,8 @@ const employeeSchema = new mongoose.Schema({
     mobileVerified: { type: Number, default: 0 },
     emailVerified: { type: Number, default: 0 },
     bankAccount: { type: String, default: '' },
-    walletLink: { type: String, default: '' }
+    walletLink: { type: String, default: '' },
+    tips: [tipSchema]
 }, { timestamps: true });
 
 const Employee = mongoose.model('Employee', employeeSchema);
