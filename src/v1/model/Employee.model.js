@@ -40,6 +40,7 @@ const employeeSchema = new mongoose.Schema({
     emailVerified: { type: Number, default: 0 },
     bankAccount: { type: String, default: '' },
     walletLink: { type: String, default: '' },
+    fcmToken: { type: String, default: "" },  // Store FCM token for push notifications
     upiId: { type: String, default: '' }, // Add UPI ID field
     tips: [tipSchema],
     payouts: [payoutSchema] // Ensure payouts field is defined
