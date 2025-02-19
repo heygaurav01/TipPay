@@ -8,22 +8,30 @@ class PaymentService {
         this.cashfreeUrl = process.env.CASHFREE_ENV === "production"
             ? "https://api.cashfree.com/pg/orders"
             : "https://sandbox.cashfree.com/pg/orders";
+
+        console.log(" Cashfree API URL:", this.cashfreeUrl);
+        console.log(" CASHFREE_APP_ID:", process.env.CASHFREE_APP_ID);
+        console.log(" CASHFREE_SECRET_KEY:", process.env.CASHFREE_SECRET_KEY);
+        console.log(" CASHFREE_ENV:", process.env.CASHFREE_ENV);
     }
 
-    //  Create a Payment Order (Backend generates a payment link)
-    async createOrder(amount, orderId, currency = "INR") {
+    async createOrder(orderId, amount, currency = "INR") {
         try {
+            if (!orderId || !amount) {
+                throw new Error("Missing required parameters: orderId, amount");
+            }
+
             const headers = {
                 "Content-Type": "application/json",
-                "x-api-version": "2025-02-18", // ✅ Updated API Version
+                "x-api-version": "2023-08-01",
                 "x-client-id": process.env.CASHFREE_APP_ID,
                 "x-client-secret": process.env.CASHFREE_SECRET_KEY
             };
 
             const body = {
                 order_amount: amount,
-                order_id: orderId,
-                order_currency: currency,
+                order_id: orderId,  //  Fixed: order_id should be a unique string
+                order_currency: currency, //  Fixed: order_currency should be "INR"
                 customer_details: {
                     customer_id: "565656",
                     customer_phone: "9917014709",
@@ -42,6 +50,8 @@ class PaymentService {
                 order_note: "Tippay"
             };
 
+            console.log(" Sending Request:", JSON.stringify(body, null, 2));
+
             const response = await fetch(this.cashfreeUrl, {
                 method: "POST",
                 headers,
@@ -49,34 +59,19 @@ class PaymentService {
             });
 
             const result = await response.json();
+            console.log(" Cashfree Response:", result);
+
+            if (result.code === "request_failed" && result.message.includes("authentication Failed")) {
+                throw new Error("Authentication Failed: Please check your API credentials.");
+            }
+
             if (result.payment_link) {
                 return { success: true, paymentLink: result.payment_link };
-            } else { console.log(response.data);
-
-                throw new Error("Failed to create payment order");
+            } else {
+                throw new Error(`Cashfree API Error: ${result.message || "Unknown error"}`);
             }
         } catch (error) {
             console.error(" Cashfree Order Creation Failed:", error);
-            return { success: false, message: error.message };
-        }
-    }
-
-    //  Verify Payment Status
-    async verifyPayment(orderId) {
-        try {
-            const response = await fetch(`${this.cashfreeUrl}/${orderId}`, {
-                method: "GET",
-                headers: {
-                    "x-api-version": "2025-02-18",
-                    "x-client-id": process.env.CASHFREE_APP_ID,
-                    "x-client-secret": process.env.CASHFREE_SECRET_KEY
-                }
-            });
-
-            const result = await response.json();
-            return result;
-        } catch (error) {
-            console.error(" Payment Verification Failed:", error);
             return { success: false, message: error.message };
         }
     }
