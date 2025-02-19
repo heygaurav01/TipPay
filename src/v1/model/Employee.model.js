@@ -4,7 +4,12 @@ const reviewSchema = new mongoose.Schema({
     rating: { type: Number, required: true },
     comment: { type: String, required: true },
     customerName: { type: String, required: true },
-    date: { type: Date, default: Date.now }
+    date: { type: Date, default: Date.now },
+    flagged: { type: Boolean, default: false }, // New field to flag inappropriate reviews
+    reports: [{ 
+        employerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Employee' }, 
+        reason: { type: String }
+    }] // New field to store reports from employers
 });
 
 const tipSchema = new mongoose.Schema({
@@ -42,6 +47,10 @@ const employeeSchema = new mongoose.Schema({
     walletLink: { type: String, default: '' },
     fcmToken: { type: String, default: "" },  // Store FCM token for push notifications
     upiId: { type: String, default: '' }, // Add UPI ID field
+    employerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Employer', required: true }, //  Add employer reference
+    status: { type: String, enum: ['active', 'inactive'], default: 'active' }, //  Track employee status
+    lowPerformanceFlag: { type: Boolean, default: false }, //  New field for low performance
+    payoutSchedule: { type: String, enum: ['weekly', 'biweekly', 'monthly'], default: 'monthly' }, //  New field
     tips: [tipSchema],
     payouts: [payoutSchema] // Ensure payouts field is defined
 }, { timestamps: true });

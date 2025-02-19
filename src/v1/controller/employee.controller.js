@@ -2,7 +2,7 @@ import EmployeeService from "../service/employee.service.js";
 import { roundNumber } from "../utils/helper.js";
 import FirestoreService from '../service/firestore.service.js';
 import TipService from "../service/tip.service.js";
-import ReviewService from "../service/review.service.js";
+import reviewService from "../service/review.service.js"; 
 import PerformanceService from "../service/performance.service.js";
 import PayoutService from "../service/payout.service.js";
 import OTPService from "../service/otp.service.js";
@@ -11,7 +11,7 @@ import PushNotificationService from "../service/pushNotification.service.js";
 const employeeService = new EmployeeService();
 const firestoreService = new FirestoreService();
 const tipService = new TipService();
-const reviewService = new ReviewService();
+//const reviewService = new ReviewService();
 const performanceService = new PerformanceService();
 const payoutService = new PayoutService();
 const otpService = new OTPService();
@@ -20,6 +20,7 @@ const pushNotificationService = new PushNotificationService();
 class EmployeeController {
     async register(req, res) {
         try {
+            console.log("Received Request Body:", req.body);
             let result = await employeeService.register(req.body);
             return res.json(result);
         } catch (err) {
@@ -262,6 +263,25 @@ class EmployeeController {
                 'success': false,
                 'message': err.message
             });
+        }
+    }
+    async flagReview(req, res) {
+        try {
+            const { reviewId } = req.body;
+            const result = await reviewService.flagReview(reviewId);
+            return res.status(result.status).json(result);
+        } catch (error) {
+            return res.status(500).json({ success: false, message: error.message });
+        }
+    }
+
+    async reportReview(req, res) {
+        try {
+            const { reviewId, employerId, reason } = req.body;
+            const result = await reviewService.reportReview(reviewId, employerId, reason);
+            return res.status(result.status).json(result);
+        } catch (error) {
+            return res.status(500).json({ success: false, message: error.message });
         }
     }
 

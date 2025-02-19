@@ -1,4 +1,4 @@
-import { auth } from '../config/firebaseAdmin.config.js'; // ✅ Import admin
+import { auth } from '../config/firebaseAdmin.config.js'; //  Import admin
 
 class PushNotificationService {
     async sendNotification(token, title, body, data = {}) {
@@ -11,11 +11,11 @@ class PushNotificationService {
                 apns: { payload: { aps: { sound: "default" } } }
             };
 
-            const response = await admin.messaging().send(message); // ✅ Use admin.messaging()
-            console.log("✅ Notification sent:", response);
+            const response = await admin.messaging().send(message); //  Use admin.messaging()
+            console.log(" Notification sent:", response);
             return { success: true, response };
         } catch (error) {
-            console.error("❌ Notification failed:", error);
+            console.error(" Notification failed:", error);
             return { success: false, message: error.message };
         }
     }

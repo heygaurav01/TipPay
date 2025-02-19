@@ -1,5 +1,6 @@
 import Employee from "../model/Employee.model.js";
 import EmployeeRepository from "../repository/empolyee.repository.js";
+import FirebaseAuthService from '../service/firebaseAuth.service.js';
 import { roundNumber, sendMailOtp } from "../utils/helper.js";
 import bcrypt from 'bcryptjs';
 import twilio from 'twilio'
@@ -16,7 +17,13 @@ const employeeRepository = new EmployeeRepository();
 class EmployeeService {
     async register(data) {
         try {
-            const { fullName, email, password, phoneNumber, ...rest } = data;
+            const { fullName, email, password, phoneNumber,firebaseToken, ...rest } = data;
+              // Verify Firebase token
+              const firebaseVerify = await FirebaseAuthService.verifyFirebaseToken(firebaseToken);
+              if (!firebaseVerify.success) {
+                  return { status: 401, message: 'Invalid Firebase token' };
+              }
+              //hash password
             const hashedPassword = await bcrypt.hash(password, 10);
             const employee = new Employee({ fullName, email, password: hashedPassword, phoneNumber, ...rest });
             await employee.save();
@@ -28,15 +35,26 @@ class EmployeeService {
 
     async login(data) {
         try {
-            const { email, password } = data;
+            const { email, password, firebaseToken } = data;
+             // Verify Firebase token
+             const firebaseVerify = await FirebaseAuthService.verifyFirebaseToken(firebaseToken);
+             if (!firebaseVerify.success) {
+                 return { status: 401, message: 'Invalid Firebase token' };
+             }
+
+             
             const employee = await Employee.findOne({ email });
             if (!employee) {
                 return { status: 404, message: 'Employee not found' };
             }
+
+            //check password
             const isMatch = await bcrypt.compare(password, employee.password);
             if (!isMatch) {
                 return { status: 400, message: 'Invalid credentials' };
             }
+
+            // Generate JWT token
             const token = jwt.sign({ id: employee._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
             return { status: 200, message: 'Login successful', token };
         } catch (error) {

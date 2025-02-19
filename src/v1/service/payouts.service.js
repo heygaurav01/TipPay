@@ -23,7 +23,7 @@ class PayoutsService {
                     "Content-Type": "application/json",
                     "X-Client-Id": process.env.CASHFREE_PAYOUT_CLIENT_ID,
                     "X-Client-Secret": process.env.CASHFREE_PAYOUT_SECRET_KEY,
-                    "X-Secure-Id": process.env.CASHFREE_PAYOUT_SECURE_ID  // ✅ Include Secure ID
+                    "X-Secure-Id": process.env.CASHFREE_PAYOUT_SECURE_ID  //  Include Secure ID
                 }
             });
 
@@ -52,7 +52,7 @@ class PayoutsService {
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${authToken}`,
-                    "X-Secure-Id": process.env.CASHFREE_PAYOUT_SECURE_ID  // ✅ Include Secure ID
+                    "X-Secure-Id": process.env.CASHFREE_PAYOUT_SECURE_ID  //  Include Secure ID
                 },
                 body: JSON.stringify(beneficiaryData)
             });

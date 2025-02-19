@@ -4,7 +4,7 @@ import employeeRoute from './src/v1/routes/employee.route.js';
 import connection from './src/v1/config/connection.config.js';
 import paymentRoute from './src/v1/routes/payment.route.js';
 import payoutsRoute from './src/v1/routes/payouts.route.js';
-
+import employerRoute from './src/v1/routes/employer.route.js';  //  New Import
 
 config();
 connection();
@@ -17,6 +17,7 @@ app.use(express.json({ urlencoded: true }));
 employeeRoute(app);
 paymentRoute(app);
 payoutsRoute(app);
+employerRoute(app);  //  Add employer routes
 
 app.listen(port, () => {
     console.log(`Server running on port http://localhost:${port}`);
