@@ -18,6 +18,12 @@ const otpService = new OTPService();
 const pushNotificationService = new PushNotificationService();
 
 class EmployeeController {
+
+    async test(req,res){
+console.log('hitting');
+res.json({success:true})
+    }
+
     async register(req, res) {
         try {
             console.log("Received Request Body:", req.body);

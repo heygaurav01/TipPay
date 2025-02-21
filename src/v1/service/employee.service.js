@@ -19,10 +19,11 @@ class EmployeeService {
         try {
             const { fullName, email, password, phoneNumber,firebaseToken, ...rest } = data;
               // Verify Firebase token
-              const firebaseVerify = await FirebaseAuthService.verifyFirebaseToken(firebaseToken);
-              if (!firebaseVerify.success) {
-                  return { status: 401, message: 'Invalid Firebase token' };
-              }
+              console.log(fullName,email,password)
+            //   const firebaseVerify = await FirebaseAuthService.verifyFirebaseToken(firebaseToken);
+            //   if (!firebaseVerify.success) {
+            //       return { status: 401, message: 'Invalid Firebase token' };
+            //   }
               //hash password
             const hashedPassword = await bcrypt.hash(password, 10);
             const employee = new Employee({ fullName, email, password: hashedPassword, phoneNumber, ...rest });

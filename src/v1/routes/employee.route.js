@@ -4,6 +4,7 @@ import EmployeeController from '../controller/employee.controller.js';
 const router = express.Router();
 const employeeController = new EmployeeController();
 
+router.get('/test',employeeController.test)
 router.post('/register', employeeController.register);
 router.post('/login', employeeController.login);
 router.post('/qrcode-link', employeeController.qrcodeLink);

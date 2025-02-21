@@ -47,7 +47,7 @@ const employeeSchema = new mongoose.Schema({
     walletLink: { type: String, default: '' },
     fcmToken: { type: String, default: "" },  // Store FCM token for push notifications
     upiId: { type: String, default: '' }, // Add UPI ID field
-    employerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Employer', required: true }, //  Add employer reference
+    employerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Employer' }, //  Add employer reference
     status: { type: String, enum: ['active', 'inactive'], default: 'active' }, //  Track employee status
     lowPerformanceFlag: { type: Boolean, default: false }, //  New field for low performance
     payoutSchedule: { type: String, enum: ['weekly', 'biweekly', 'monthly'], default: 'monthly' }, //  New field

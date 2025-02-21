@@ -14,6 +14,11 @@ const port = process.env.PORT || 5009;
 app.use(express.json());
 app.use(express.json({ urlencoded: true }));
 
+app.get('/test',(req,res)=>{
+    console.log('req received');
+    res.json({success:'true'})
+})
+
 employeeRoute(app);
 paymentRoute(app);
 payoutsRoute(app);
