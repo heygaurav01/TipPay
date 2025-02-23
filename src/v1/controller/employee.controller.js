@@ -2,16 +2,17 @@ import EmployeeService from "../service/employee.service.js";
 import { roundNumber } from "../utils/helper.js";
 import FirestoreService from '../service/firestore.service.js';
 import TipService from "../service/tip.service.js";
-import reviewService from "../service/review.service.js"; 
+import ReviewService from "../service/review.service.js"; 
 import PerformanceService from "../service/performance.service.js";
 import PayoutService from "../service/payout.service.js";
 import OTPService from "../service/otp.service.js";
 import PushNotificationService from "../service/pushNotification.service.js";
+//import Employee from '../models/Employee.model.js'; // Import the Employee model
 
 const employeeService = new EmployeeService();
 const firestoreService = new FirestoreService();
 const tipService = new TipService();
-//const reviewService = new ReviewService();
+const reviewService = new ReviewService();
 const performanceService = new PerformanceService();
 const payoutService = new PayoutService();
 const otpService = new OTPService();
@@ -177,8 +178,24 @@ class EmployeeController {
     async updateFcmToken(req, res) {
         try {
             const { user_id, fcmToken } = req.body;
-            const employee = await employeeService.updateFcmToken(user_id, fcmToken);
-            return res.json(employee);
+    
+            // Validate input
+            if (!user_id || !fcmToken) {
+                return res.status(400).json({ success: false, message: "user_id and fcmToken are required" });
+            }
+    
+            // Update the FCM token in the database
+            const employee = await Employee.findByIdAndUpdate(
+                user_id,
+                { fcmToken: fcmToken },
+                { new: true }
+            );
+    
+            if (!employee) {
+                return res.status(404).json({ success: false, message: "Employee not found" });
+            }
+    
+            return res.status(200).json({ success: true, message: "FCM token updated successfully", employee });
         } catch (error) {
             return res.status(500).json({ success: false, message: error.message });
         }
@@ -186,17 +203,16 @@ class EmployeeController {
 
     async addTip(req, res) {
         try {
-            const result = await employeeService.addTip(req.body);
-            if (result.status === 201) {
-                const employee = await employeeService.getEmployeeById(req.body.user_id);
-                if (employee && employee.fcmToken) {
-                    await pushNotificationService.sendNotification(
-                        employee.fcmToken, "New Tip Received", 
-                        `You got a tip of ₹${req.body.amount}.`
-                    );
-                }
+            console.log("Request Body:", req.body); // Debugging line
+            const { user_id, amount, customerName, paymentMethod } = req.body;
+
+            if (!user_id || !amount || !customerName || !paymentMethod) {
+                return res.status(400).json({ success: false, message: "All fields are required" });
             }
-            return res.status(result.status).json(result);
+
+            const result = await employeeService.addTip(user_id, amount, customerName, paymentMethod);
+            return res.status(200).json(result);
+
         } catch (error) {
             return res.status(500).json({ success: false, message: error.message });
         }
@@ -224,7 +240,7 @@ class EmployeeController {
 
     async addReview(req, res) {
         try {
-            const result = await employeeService.addReview(req.body);
+            const result = await reviewService.addReview(req.body); // Use reviewService instead of employeeService
             if (result.status === 201) {
                 const employee = await employeeService.getEmployeeById(req.body.user_id);
                 if (employee && employee.fcmToken) {
@@ -239,7 +255,6 @@ class EmployeeController {
             return res.status(500).json({ success: false, message: err.message });
         }
     }
-
     async getReviews(req, res) {
         try {
             const { user_id, tip_id } = req.query;

@@ -1,28 +1,52 @@
 import Employee from '../model/Employee.model.js';
 
 class ReviewService {
-    // 🚀 Add a new review
+    //  Add a new review
     async addReview(data) {
         try {
+            console.log("Received Request Body:", data); // Debugging: Log the request body
+
             const { user_id, tip_id, rating, comment, customerName } = data;
+
+            // Check if all required fields are present
+            if (!user_id || !tip_id || !rating || !comment || !customerName) {
+                console.log("Missing fields in request body:", { user_id, tip_id, rating, comment, customerName }); // Debugging
+                return { status: 400, message: "All fields are required" };
+            }
+
+            // Find the employee by user_id
             const employee = await Employee.findById(user_id);
             if (!employee) {
                 return { status: 404, message: 'Employee not found' };
             }
+
+            // Find the tip by tip_id in the employee's tips array
             const tip = employee.tips.id(tip_id);
             if (!tip) {
                 return { status: 404, message: 'Tip not found' };
             }
-            const review = { rating, comment, customerName, flagged: false, reports: [] }; // Added new fields
+
+            // Create the review object
+            const review = {
+                rating,
+                comment,
+                customerName,
+                date: new Date(),
+                flagged: false,
+                reports: []
+            };
+
+            // Add the review to the tip's reviews array
             tip.reviews.push(review);
             await employee.save();
+
             return { status: 201, message: 'Review added successfully', review };
         } catch (error) {
+            console.error("Error in addReview:", error); // Debugging
             return { status: 500, message: error.message };
         }
     }
-
-    // 🚀 Get reviews for a tip
+    //  Get reviews for a tip
     async getReviews(user_id, tip_id) {
         try {
             const employee = await Employee.findById(user_id);
@@ -39,7 +63,7 @@ class ReviewService {
         }
     }
 
-    // 🚀 Get review summary for an employee
+    //  Get review summary for an employee
     async getReviewSummary(user_id) {
         try {
             const employee = await Employee.findById(user_id);
@@ -68,7 +92,7 @@ class ReviewService {
         }
     }
 
-    // 🚀 Flag a review as inappropriate
+    //  Flag a review as inappropriate
     async flagReview(reviewId) {
         try {
             const employee = await Employee.findOne({ "tips.reviews._id": reviewId });
@@ -86,7 +110,7 @@ class ReviewService {
         }
     }
 
-    // 🚀 Report a flagged review
+    //  Report a flagged review
     async reportReview(reviewId, employerId, reason) {
         try {
             const employee = await Employee.findOne({ "tips.reviews._id": reviewId });
@@ -104,7 +128,7 @@ class ReviewService {
         }
     }
 
-    // 🚀 Get all flagged reviews (For Admins)
+    //  Get all flagged reviews (For Admins)
     async getFlaggedReviews() {
         try {
             const employees = await Employee.find({ "tips.reviews.flagged": true });
@@ -118,7 +142,7 @@ class ReviewService {
         }
     }
 
-    // 🚀 Remove a flagged review (Admin Action)
+    //  Remove a flagged review (Admin Action)
     async removeFlaggedReview(reviewId) {
         try {
             const employee = await Employee.findOne({ "tips.reviews._id": reviewId });
@@ -136,4 +160,5 @@ class ReviewService {
     }
 }
 
-export default new ReviewService();
+// Export the class instead of an instance
+export default ReviewService; // <-- Changed this line

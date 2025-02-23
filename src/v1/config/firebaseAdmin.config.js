@@ -12,10 +12,12 @@ const serviceAccountPath = path.join(__dirname, 'serviceAccountKey.json');
 const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
 
 // Initialize Firebase Admin
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    databaseURL: "https://tippaydigital.firebaseio.com" // Replace with your database URL
-});
+if (!admin.apps.length) {
+    admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        databaseURL: "https://tippaydigital.firebaseio.com" // Replace with your database URL
+    });
+}
 
 const auth = admin.auth();
 export { auth };
