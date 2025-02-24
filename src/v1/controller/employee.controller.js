@@ -1,13 +1,14 @@
+// employee.controller.js
+
 import EmployeeService from "../service/employee.service.js";
 import { roundNumber } from "../utils/helper.js";
 import FirestoreService from '../service/firestore.service.js';
 import TipService from "../service/tip.service.js";
-import ReviewService from "../service/review.service.js"; 
+import ReviewService from "../service/review.service.js";
 import PerformanceService from "../service/performance.service.js";
 import PayoutService from "../service/payout.service.js";
 import OTPService from "../service/otp.service.js";
-import PushNotificationService from "../service/pushNotification.service.js";
-//import Employee from '../models/Employee.model.js'; // Import the Employee model
+import PushNotificationService from "../service/pushNotification.service.js"; // Corrected import
 
 const employeeService = new EmployeeService();
 const firestoreService = new FirestoreService();
@@ -16,7 +17,7 @@ const reviewService = new ReviewService();
 const performanceService = new PerformanceService();
 const payoutService = new PayoutService();
 const otpService = new OTPService();
-const pushNotificationService = new PushNotificationService();
+const pushNotificationService = PushNotificationService; // Corrected instantiation
 
 class EmployeeController {
     async register(req, res) {
@@ -31,7 +32,7 @@ class EmployeeController {
             });
         }
     }
-    
+
     async login(req, res) {
         try {
             const result = await employeeService.login(req.body);
@@ -178,23 +179,23 @@ class EmployeeController {
     async updateFcmToken(req, res) {
         try {
             const { user_id, fcmToken } = req.body;
-    
+
             // Validate input
             if (!user_id || !fcmToken) {
                 return res.status(400).json({ success: false, message: "user_id and fcmToken are required" });
             }
-    
+
             // Update the FCM token in the database
             const employee = await Employee.findByIdAndUpdate(
                 user_id,
                 { fcmToken: fcmToken },
                 { new: true }
             );
-    
+
             if (!employee) {
                 return res.status(404).json({ success: false, message: "Employee not found" });
             }
-    
+
             return res.status(200).json({ success: true, message: "FCM token updated successfully", employee });
         } catch (error) {
             return res.status(500).json({ success: false, message: error.message });
@@ -245,7 +246,7 @@ class EmployeeController {
                 const employee = await employeeService.getEmployeeById(req.body.user_id);
                 if (employee && employee.fcmToken) {
                     await pushNotificationService.sendNotification(
-                        employee.fcmToken, "New Customer Review", 
+                        employee.fcmToken, "New Customer Review",
                         "A customer has left a new review for you."
                     );
                 }
@@ -329,17 +330,25 @@ class EmployeeController {
     async requestPayout(req, res) {
         try {
             const result = await employeeService.requestPayout(req.body);
+            console.log("Payout Service Response:", result); // 🔍 Debugging log
+
+            if (!result) {
+                return res.status(500).json({ success: false, message: "Internal server error" });
+            }
+
             if (result.status === 201) {
                 const employee = await employeeService.getEmployeeById(req.body.user_id);
                 if (employee && employee.fcmToken) {
                     await pushNotificationService.sendNotification(
-                        employee.fcmToken, "Payout Requested", 
+                        employee.fcmToken, "Payout Requested",
                         `Your payout request of ₹${req.body.amount} has been submitted.`
                     );
                 }
             }
             return res.status(result.status).json(result);
+
         } catch (err) {
+            console.error("Request Payout Controller Error:", err); // 🔍 Debugging log
             return res.status(500).json({ success: false, message: err.message });
         }
     }
@@ -374,6 +383,39 @@ class EmployeeController {
         try {
             const { uid, otp } = req.body;
             const result = await otpService.verifyOTP(uid, otp);
+            return res.status(result.status).json(result);
+        } catch (err) {
+            return res.status(500).json({
+                'success': false,
+                'message': err.message
+            });
+        }
+    }
+    async someFunction(req, res) {
+        try {
+            const result = await pushNotificationService.sendNotification(
+                "userToken",
+                "Hello",
+                "This is a test notification"
+            );
+            return res.status(200).json(result);
+        } catch (error) {
+            return res.status(500).json({ success: false, message: error.message });
+        }
+    }
+
+    async authorizePayout(req, res) {
+        try {
+            const { employeeId, amount, method } = req.body;
+            const result = await employeeService.authorizePayout(employeeId, amount, method);
+
+            if (result.success) {
+                const employee = await employeeService.getEmployeeById(employeeId);
+                if (employee && employee.fcmToken) {
+                    await pushNotificationService.notifyPayoutApproval(employee.fcmToken, amount);
+                }
+            }
+
             return res.status(result.status).json(result);
         } catch (err) {
             return res.status(500).json({
