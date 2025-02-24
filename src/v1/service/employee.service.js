@@ -18,7 +18,7 @@ class EmployeeService {
             const { fullName, email, password, phoneNumber, ...rest } = data;
             const existingEmployee = await Employee.findOne({ email });
             if (existingEmployee) {
-                return { status: 400, message: "Email already exists" };
+                return { status: 200, message: "Email already exists" };
             }
             
             const hashedPassword = await bcrypt.hash(password, 10);
@@ -216,5 +216,5 @@ class EmployeeService {
         }
     }
 }
-
+      
 export default EmployeeService;

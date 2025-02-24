@@ -1,7 +1,9 @@
 import employerService from "../service/employer.service.js";
-import employerPerformanceService from "../service/employerPerformance.service.js"; // ✅ New Import
+import employerPerformanceService from "../service/employerPerformance.service.js";
 import payoutControlService from "../service/payoutControl.service.js";
-import pushNotificationService from "../service/pushNotification.service.js"; // ✅ New Import
+import pushNotificationService from "../service/pushNotification.service.js";
+import jwt from 'jsonwebtoken';
+import Employee from "../model/Employee.model.js";
 
 class EmployerController {
     async getEmployees(req, res) {
@@ -43,7 +45,25 @@ class EmployerController {
             return res.status(500).json({ success: false, message: error.message });
         }
     }
-    async getEmployees(req, res) {
+async getEmployees(req, res) {
+        try {
+            const employerId = req.user.id;
+            const result = await employerService.getEmployeesByEmployer(employerId);
+            return res.status(result.status).json(result);
+        } catch (error) {
+            return res.status(500).json({ success: false, message: error.message });
+        }
+    }
+async getEmployees(req, res) {
+        try {
+            const employerId = req.user.id;
+            const result = await employerService.getEmployeesByEmployer(employerId);
+            return res.status(result.status).json(result);
+        } catch (error) {
+            return res.status(500).json({ success: false, message: error.message });
+        }
+    }
+async getEmployees(req, res) {
         try {
             const employerId = req.user.id;
             const result = await employerService.getEmployeesByEmployer(employerId);
@@ -59,7 +79,11 @@ class EmployerController {
             const result = await payoutControlService.authorizePayout(employeeId, amount, method);
             
             if (result.status === 200) {
-                await pushNotificationService.notifyPayoutApproval(req.user.id, result.employeeName, amount);
+                const employee = await Employee.findById(employeeId);
+                if (employee && employee.fcmToken) {
+                    await pushNotificationService.notifyPayoutApproval(employee.fcmToken, amount);
+                }
+                return res.status(200).json({ success: true, message: "Payout authorized successfully", payout: result.payout });
             }
 
             return res.status(result.status).json(result);
@@ -71,17 +95,37 @@ class EmployerController {
     async notifyLowPerformance(req, res) {
         try {
             const { employeeName } = req.body;
-            const result = await pushNotificationService.notifyLowPerformance(req.user.id, employeeName);
+            const token = req.headers.authorization.split(' ')[1]; // Extract token from header
+            const decoded = jwt.decode(token); // Decode token to get employer ID
+            const employerId = decoded.id;
+
+            // Retrieve the employee from the database based on employeeName
+            const employee = await Employee.findOne({ fullName: employeeName });
+
+            if (!employee) {
+                return res.status(404).json({ success: false, message: 'Employee not found' });
+            }
+            const result = await pushNotificationService.notifyLowPerformance(employee.fcmToken, employeeName);
             return res.status(200).json(result);
         } catch (error) {
             return res.status(500).json({ success: false, message: error.message });
         }
     }
 
+
     async notifyPaymentIssue(req, res) {
         try {
             const { employeeName, issue } = req.body;
-            const result = await pushNotificationService.notifyPaymentIssue(req.user.id, employeeName, issue);
+            const token = req.headers.authorization.split(' ')[1]; // Extract token from header
+            const decoded = jwt.decode(token); // Decode token to get employer ID
+            const employerId = decoded.id;
+            // Retrieve the employee from the database based on employeeName
+            const employee = await Employee.findOne({ fullName: employeeName });
+
+            if (!employee) {
+                return res.status(404).json({ success: false, message: 'Employee not found' });
+            }
+            const result = await pushNotificationService.notifyPaymentIssue(employee.fcmToken, employeeName, issue);
             return res.status(200).json(result);
         } catch (error) {
             return res.status(500).json({ success: false, message: error.message });
@@ -91,7 +135,16 @@ class EmployerController {
     async notifySystemUpdate(req, res) {
         try {
             const { updateMessage } = req.body;
-            const result = await pushNotificationService.notifySystemUpdate(req.user.id, updateMessage);
+            const token = req.headers.authorization.split(' ')[1]; // Extract token from header
+            const decoded = jwt.decode(token); // Decode token to get employer ID
+            const employerId = decoded.id;
+            // Retrieve the employee from the database based on employeeName
+            const employee = await Employee.findOne({ _id: employerId });
+
+            if (!employee) {
+                return res.status(404).json({ success: false, message: 'Employee not found' });
+            }
+            const result = await pushNotificationService.notifySystemUpdate(employee.fcmToken, updateMessage);
             return res.status(200).json(result);
         } catch (error) {
             return res.status(500).json({ success: false, message: error.message });
@@ -101,7 +154,16 @@ class EmployerController {
     async notifyComplianceRequirement(req, res) {
         try {
             const { complianceMessage } = req.body;
-            const result = await pushNotificationService.notifyComplianceRequirement(req.user.id, complianceMessage);
+            const token = req.headers.authorization.split(' ')[1]; // Extract token from header
+            const decoded = jwt.decode(token); // Decode token to get employer ID
+            const employerId = decoded.id;
+            // Retrieve the employee from the database based on employeeName
+            const employee = await Employee.findOne({ _id: employerId });
+
+            if (!employee) {
+                return res.status(404).json({ success: false, message: 'Employee not found' });
+            }
+            const result = await pushNotificationService.notifyComplianceRequirement(employee.fcmToken, complianceMessage);
             return res.status(200).json(result);
         } catch (error) {
             return res.status(500).json({ success: false, message: error.message });

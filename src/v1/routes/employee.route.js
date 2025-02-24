@@ -1,11 +1,8 @@
 import express from 'express';
 import EmployeeController from '../controller/employee.controller.js';
-//import ReviewController from '../controllers/ReviewController.js';
 
 const router = express.Router();
 const employeeController = new EmployeeController();
-//const reviewController = new ReviewController(); // Initialize ReviewController
-
 
 router.post('/register', employeeController.register);
 router.post('/login', employeeController.login);
@@ -32,19 +29,18 @@ router.get('/compare-performance', employeeController.comparePerformance);
 // Payout Management Routes
 router.post('/request-payout', employeeController.requestPayout);
 router.get('/get-payout-history', employeeController.getPayoutHistory);
+router.post('/authorize-payout', employeeController.authorizePayout);
 
 // OTP Management Routes
 router.post('/send-otp', employeeController.sendOTP);
 router.post('/verify-otp', employeeController.verifyOTP);
 
 // Review Moderation Routes
-//router.put('/flag-review', reviewController.flagReview.bind(reviewController));
 router.put('/flag-review', employeeController.flagReview);
 router.post('/report-review', employeeController.reportReview);
 
 // Update FCM token
 router.put('/update-fcm-token', employeeController.updateFcmToken.bind(employeeController));
-
 
 export default (app) => {
     app.use('/api/v1/employees', router);

@@ -21,10 +21,10 @@ admin.initializeApp({
 async function generateCustomToken(uid) {
     try {
         const customToken = await admin.auth().createCustomToken(uid);
-        console.log("✅ Firebase Custom Token:", customToken);
+        console.log(" Firebase Custom Token:", customToken);
         return customToken;
     } catch (error) {
-        console.error("❌ Error generating Firebase Token:", error.message);
+        console.error(" Error generating Firebase Token:", error.message);
     }
 }
 

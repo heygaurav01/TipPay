@@ -29,6 +29,18 @@ class EmployerService {
         }
     }
 
+    async getEmployeeById(employeeId) {
+        try {
+            const employee = await Employee.findById(employeeId);
+            if (!employee) {
+                return { success: false, message: "Employee not found" };
+            }
+            return { success: true, employee };
+        } catch (error) {
+            return { success: false, message: error.message };
+        }
+    }
+
     // Deactivate or Reactivate Employee
     async updateEmployeeStatus(employeeId, status) {
         try {

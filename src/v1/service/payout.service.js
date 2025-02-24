@@ -4,10 +4,16 @@ class PayoutService {
     async requestPayout(data) {
         try {
             const { user_id, amount, method } = data;
+            
+            if (!user_id || !amount || !method) {
+                return { status: 400, message: 'Missing required fields' };
+            }
+    
             const employee = await Employee.findById(user_id);
             if (!employee) {
                 return { status: 404, message: 'Employee not found' };
             }
+    
             let payoutDetails;
             if (method === 'bank') {
                 payoutDetails = employee.bankAccount;
@@ -18,15 +24,18 @@ class PayoutService {
             } else {
                 return { status: 400, message: 'Invalid payout method' };
             }
+    
             const payout = { amount, method, payoutDetails };
-            employee.payouts.push(payout); // Ensure payouts field is being used correctly
+            employee.payouts.push(payout);
             await employee.save();
+    
             return { status: 201, message: 'Payout requested successfully', payout };
+    
         } catch (error) {
+            console.error("Request Payout Error:", error); // Debugging log
             return { status: 500, message: error.message };
         }
     }
-
     async getPayoutHistory(user_id) {
         try {
             const employee = await Employee.findById(user_id);
