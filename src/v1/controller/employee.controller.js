@@ -24,7 +24,15 @@ class EmployeeController {
         try {
             console.log("Received Request Body:", req.body);
             let result = await employeeService.register(req.body);
-            return res.json(result);
+            if (result.success) {
+                return res.status(201).json({
+                    status: 201,
+                    message: "Employee registered successfully",
+                    user_id: result.employee._id // Include user_id in the response
+                });
+            } else {
+                return res.status(400).json(result);
+            }
         } catch (err) {
             return res.status(500).json({
                 'success': false,
@@ -32,7 +40,6 @@ class EmployeeController {
             });
         }
     }
-
     async login(req, res) {
         try {
             const result = await employeeService.login(req.body);
@@ -176,32 +183,32 @@ class EmployeeController {
         }
     }
 
-    async updateFcmToken(req, res) {
-        try {
-            const { user_id, fcmToken } = req.body;
+    // employee.controller.js
+async updateFcmToken(req, res) {
+    try {
+        const { user_id, fcmToken } = req.body;
 
-            // Validate input
-            if (!user_id || !fcmToken) {
-                return res.status(400).json({ success: false, message: "user_id and fcmToken are required" });
-            }
-
-            // Update the FCM token in the database
-            const employee = await Employee.findByIdAndUpdate(
-                user_id,
-                { fcmToken: fcmToken },
-                { new: true }
-            );
-
-            if (!employee) {
-                return res.status(404).json({ success: false, message: "Employee not found" });
-            }
-
-            return res.status(200).json({ success: true, message: "FCM token updated successfully", employee });
-        } catch (error) {
-            return res.status(500).json({ success: false, message: error.message });
+        // Validate input
+        if (!user_id || !fcmToken) {
+            return res.status(400).json({ success: false, message: "user_id and fcmToken are required" });
         }
-    }
 
+        // Update the FCM token in the database
+        const employee = await Employee.findByIdAndUpdate(
+            user_id,
+            { fcmToken: fcmToken },
+            { new: true }
+        );
+
+        if (!employee) {
+            return res.status(404).json({ success: false, message: "Employee not found" });
+        }
+
+        return res.status(200).json({ success: true, message: "FCM token updated successfully", employee });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: error.message });
+    }
+}
     async addTip(req, res) {
         try {
             console.log("Request Body:", req.body); // Debugging line

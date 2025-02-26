@@ -1,7 +1,13 @@
+// pushNotification.service.js
 import admin from 'firebase-admin';
 
 class PushNotificationService {
     async sendNotification(token, title, body, data = {}) {
+        if (!token || typeof token !== 'string' || token.trim() === '') {
+            console.error("Invalid FCM token:", token);
+            return { success: false, message: "Invalid FCM token provided" };
+        }
+
         try {
             const message = {
                 token: token,
@@ -11,7 +17,9 @@ class PushNotificationService {
                 apns: { payload: { aps: { sound: "default" } } }
             };
 
+            // Send the message using the Firebase Admin SDK
             const response = await admin.messaging().send(message);
+
             console.log("Notification sent:", response);
             return { success: true, response };
         } catch (error) {

@@ -3,14 +3,14 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
-// Your web app's Firebase configuration
+// Firebase Configuration from Environment Variables
 const firebaseConfig = {
-    apiKey: "AIzaSyDuU8f8M3TBvz3dK2CRCLXQkgiyuB6Yirw",
-    authDomain: "tippaydigital.firebaseapp.com",
-    projectId: "tippaydigital",
-    storageBucket: "tippaydigital.appspot.com",
-    messagingSenderId: "16775412936",
-    appId: "1:16775412936:android:1c8504a665cc907982f9fd"
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.FIREBASE_APP_ID,
 };
 
 // Initialize Firebase

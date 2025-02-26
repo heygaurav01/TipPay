@@ -15,18 +15,11 @@ const employeeRepository = new EmployeeRepository();
 class EmployeeService {
     async register(data) {
         try {
-            const { fullName, email, password, phoneNumber, ...rest } = data;
-            const existingEmployee = await Employee.findOne({ email });
-            if (existingEmployee) {
-                return { status: 200, message: "Email already exists" };
-            }
-            
-            const hashedPassword = await bcrypt.hash(password, 10);
-            const employee = new Employee({ fullName, email, password: hashedPassword, phoneNumber, ...rest });
-            await employee.save();
-            return { status: 201, message: "Employee registered successfully" };
+            const newEmployee = new Employee(data);
+            const savedEmployee = await newEmployee.save();
+            return { success: true, employee: savedEmployee };
         } catch (error) {
-            return { status: 500, message: error.message };
+            return { success: false, message: error.message };
         }
     }
 

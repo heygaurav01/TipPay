@@ -77,7 +77,7 @@ async getEmployees(req, res) {
         try {
             const { employeeId, amount, method } = req.body;
             const result = await payoutControlService.authorizePayout(employeeId, amount, method);
-            
+
             if (result.status === 200) {
                 const employee = await Employee.findById(employeeId);
                 if (employee && employee.fcmToken) {
@@ -95,17 +95,42 @@ async getEmployees(req, res) {
     async notifyLowPerformance(req, res) {
         try {
             const { employeeName } = req.body;
-            const token = req.headers.authorization.split(' ')[1]; // Extract token from header
-            const decoded = jwt.decode(token); // Decode token to get employer ID
-            const employerId = decoded.id;
-
+    
             // Retrieve the employee from the database based on employeeName
             const employee = await Employee.findOne({ fullName: employeeName });
-
+    
             if (!employee) {
                 return res.status(404).json({ success: false, message: 'Employee not found' });
             }
+    
+            // Log the FCM token
+            console.log("FCM Token for " + employeeName + ":", employee.fcmToken);
+    
+            // Check if the FCM token exists and is a string
+            if (!employee.fcmToken) {
+                console.error("FCM token is null or undefined.");
+                return res.status(500).json({ success: false, message: "FCM token is null or undefined" });
+            }
+    
+            if (typeof employee.fcmToken !== 'string') {
+                console.error("FCM token is not a string. Type:", typeof employee.fcmToken);
+                return res.status(500).json({ success: false, message: "FCM token is not a string" });
+            }
+    
+            if (employee.fcmToken.trim() === '') {
+                console.error("FCM token is an empty string.");
+                return res.status(500).json({ success: false, message: "FCM token is an empty string" });
+            }
+    
+            // Log arguments before calling the push notification service
+            console.log("Calling pushNotificationService.notifyLowPerformance with:", employee.fcmToken, employeeName);
+    
+            // Now you have the employee's fcmToken, so you can send the notification
             const result = await pushNotificationService.notifyLowPerformance(employee.fcmToken, employeeName);
+    
+            // Log the result after calling the push notification service
+            console.log("pushNotificationService.notifyLowPerformance result:", result);
+    
             return res.status(200).json(result);
         } catch (error) {
             return res.status(500).json({ success: false, message: error.message });
